@@ -1,5 +1,11 @@
 package uk.ac.ucl.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +28,27 @@ public class Note {
         this.attachments = new ArrayList<>();
     }
 
-    // Getters and Setters
+    @JsonCreator
+    public Note(@JsonProperty("id") String id,
+                @JsonProperty("title") String title,
+                @JsonProperty("content") String content,
+                @JsonProperty("dateCreated") LocalDateTime dateCreated,
+                @JsonProperty("tags") List<String> tags,
+                @JsonProperty("attachments") List<String> attachments) {
+        this.id = id;
+        this.title = title;
+        this.content = content;
+        this.dateCreated = dateCreated;
+        this.tags = tags != null ? new ArrayList<>(tags) : new ArrayList<>();
+        this.attachments = attachments != null ? new ArrayList<>(attachments) : new ArrayList<>();
+    }
+
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getTitle() {
@@ -47,43 +71,44 @@ public class Note {
         return dateCreated;
     }
 
-    // Category Methods
-    public List<String> getCategories() {
+    public void setDateCreated(LocalDateTime dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public List<String> getTags() {
         return tags;
     }
 
-    public void addTag(String tag) {
-        if (!tags.contains(tag)) {
-            tags.add(tag);
-        }
+    public void setTags(List<String> tags) {
+        this.tags = tags;
     }
 
-    public void removeTag(String tag) {
-        tags.remove(tag);
-    }
-
-    // Attachment Methods
     public List<String> getAttachments() {
         return attachments;
     }
 
-    public void addAttachment(String id) {
-        attachments.add(id);
+    public void setAttachments(List<String> attachments) {
+        this.attachments = attachments;
     }
 
-    public void removeAttachment(String id) {
-        attachments.remove(id);
-    }
-
-    public void saveNote(){
+    public void saveNote() {
         try {
-            WriteFile data = new WriteFile("data/Notes.json");
-            data.writeToFile(content);
-            WriteFile data2 = new WriteFile("data/Notes.json", true);
-            data2.writeToFile(id + "," + title + "," + dateCreated + "," + tags + "," + attachments);
-        }
-        catch (Exception e) {
-            System.out.println("Error writing to file");
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
+            File file = new File("data/Notes.json");
+            List<Note> notes;
+
+            if (file.exists()) {
+                Note[] existingNotes = objectMapper.readValue(file, Note[].class);
+                notes = new ArrayList<>(List.of(existingNotes));
+            } else {
+                notes = new ArrayList<>();
+            }
+
+            notes.add(this);
+            objectMapper.writeValue(file, notes);
+        } catch (IOException e) {
+            System.out.println("Error writing JSON file: " + e.getMessage());
         }
     }
 
