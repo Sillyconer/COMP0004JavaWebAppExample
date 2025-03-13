@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create New Note</title>
+  <link rel="stylesheet" type="text/css" href="styles.css">
+  <style>
+    textarea {
+      background-color: #4B0082; /* Dark purple color */
+      color: white; /* Text color */
+    }
+  </style>
+</head>
+<body>
+<h2>Create New Note</h2>
+<form action="newnote.html" method="post">
+  <label for="title">Title:</label>
+  <input type="text" id="title" name="title" required><br><br>
+  <label for="content">Content:</label><br>
+  <textarea id="content" name="content" rows="60" cols="90" required></textarea><br><br>
+  <input type="submit" value="Create Note">
+</form>
+</body>
+</html>
